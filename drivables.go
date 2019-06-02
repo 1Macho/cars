@@ -1,4 +1,4 @@
-package cars
+package main
 
 import (
   "github.com/1Macho/physics"

@@ -3,7 +3,6 @@ package main
 import (
   "github.com/veandco/go-sdl2/sdl"
   "github.com/1Macho/geometry"
-  "github.com/1Macho/cars"
   "github.com/1Macho/physics"
   "github.com/1Macho/raycasting"
   "time"
@@ -53,11 +52,11 @@ func main() {
 
   testShape := geometry.IntermitentShapeFromPoints(testPoints)
 
-  testLoop := cars.Loop{testShape, geometry.Point{300,300}, testShape[0], testShape}
+  testLoop := Loop{testShape, geometry.Point{300,300}, testShape[0], testShape}
 
   testScene := raycasting.Scene{testShape}
 
-  testCar := cars.Car{cars.Drivable{testParticle, 0, geometry.Angle{45}}, 255, 255, 0}
+  testCar := Car{Drivable{testParticle, 0, geometry.Angle{45}}, 255, 255, 0}
 
   running := true
   for running {
