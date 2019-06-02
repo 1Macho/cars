@@ -38,33 +38,29 @@ func main() {
   //println(geometry.InterceptRayLine(testRay,testLine).X)
   //println(geometry.InterceptRayLine(testRay,testLine).Y)
 
+
+  testLoop := BuildCircularTrack(1000, 1400, 16)
+
+  testScene := raycasting.Scene{testLoop.Walls}
+
   testParticle := physics.Particle{
-    geometry.Point{600,600},
+    testLoop.Start,
     geometry.Point{0,0},
     geometry.Point{0,0},
     1.0}
 
-  testPoints := []geometry.Point{
-    geometry.Point{100,100},
-    geometry.Point{1100,100},
-    geometry.Point{1100,900},
-    geometry.Point{100,900}}
+  testCar := Car{Drivable{testParticle, 0, geometry.Angle{90}}, 255, 255, 0}
 
-  testShape := geometry.IntermitentShapeFromPoints(testPoints)
 
-  testLoop := Loop{testShape, geometry.Point{300,300}, testShape[0], testShape}
-
-  testScene := raycasting.Scene{testShape}
-
-  testCar := Car{Drivable{testParticle, 0, geometry.Angle{45}}, 255, 255, 0}
 
   running := true
   for running {
+    offset := testCar.Drivable.Particle.Position.Inverse().Add(geometry.Point{600, 500})
     renderer.SetDrawColor(0,0,0,0)
     renderer.Clear()
     renderer.SetDrawColor(200,200,0,255)
-    testLoop.Draw(renderer, geometry.Point{0,0})
-    testCar.Draw(renderer, geometry.Point{0,0})
+    testLoop.Draw(renderer, offset)
+    testCar.Draw(renderer, offset)
     testCar.Drivable.Tick()
 
     testRay := geometry.Ray{
@@ -72,22 +68,23 @@ func main() {
         testCar.Drivable.Direction,
         testCar.Drivable.Particle.Position}}
 
+    renderer.SetDrawColor(0,190,190,255)
     hit, cast := testScene.ClosestRaycast(testRay)
+    cast = cast.Add(offset)
     if(hit) {
-      renderer.SetDrawColor(255,255,255,255)
-      renderer.DrawLine(int32(testCar.Drivable.Particle.Position.X), int32(testCar.Drivable.Particle.Position.Y), int32(cast.X), int32(cast.Y))
+      renderer.DrawLine(int32(testCar.Drivable.Particle.Position.X + offset.X), int32(testCar.Drivable.Particle.Position.Y + offset.Y), int32(cast.X), int32(cast.Y))
     }
     testRay.Line.Direction = testRay.Line.Direction.Add(15)
     hit, cast = testScene.ClosestRaycast(testRay)
+    cast = cast.Add(offset)
     if(hit) {
-      renderer.SetDrawColor(255,255,255,255)
-      renderer.DrawLine(int32(testCar.Drivable.Particle.Position.X), int32(testCar.Drivable.Particle.Position.Y), int32(cast.X), int32(cast.Y))
+      renderer.DrawLine(int32(testCar.Drivable.Particle.Position.X + offset.X), int32(testCar.Drivable.Particle.Position.Y + offset.Y), int32(cast.X), int32(cast.Y))
     }
     testRay.Line.Direction = testRay.Line.Direction.Add(-30)
     hit, cast = testScene.ClosestRaycast(testRay)
+    cast = cast.Add(offset)
     if(hit) {
-      renderer.SetDrawColor(255,255,255,255)
-      renderer.DrawLine(int32(testCar.Drivable.Particle.Position.X), int32(testCar.Drivable.Particle.Position.Y), int32(cast.X), int32(cast.Y))
+      renderer.DrawLine(int32(testCar.Drivable.Particle.Position.X + offset.X), int32(testCar.Drivable.Particle.Position.Y + offset.Y), int32(cast.X), int32(cast.Y))
     }
 
 //    println(testCar.Drivable.Direction.Value)

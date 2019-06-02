@@ -27,7 +27,7 @@ func DrawSegments (renderer *sdl.Renderer, offset geometry.Point, toDraw []geome
 func (l Loop) Draw (renderer *sdl.Renderer, offset geometry.Point) {
   renderer.SetDrawColor(255,255,255,255)
   DrawSegments(renderer, offset, l.Walls)
-  renderer.SetDrawColor(0,0,255,70)
+  renderer.SetDrawColor(0,0,120,255)
   DrawSegments(renderer, offset, l.CheckPoints)
   renderer.SetDrawColor(255,0,0,255)
   DrawSegment(renderer, offset, l.FinishLine)
