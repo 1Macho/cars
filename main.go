@@ -49,7 +49,7 @@ func main() {
     geometry.Point{0,0},
     1.0}
 
-  testCar := Car{Drivable{testParticle, 0, geometry.Angle{90}}, 255, 255, 0}
+  testCar := Car{Drivable{testParticle, 0, geometry.Angle{90}}, testLoop, true, false, 0, 255, 255, 0}
 
 
 
@@ -84,7 +84,7 @@ func main() {
     if(hit) {
       renderer.DrawLine(int32(testCar.Drivable.Particle.Position.X + offset.X), int32(testCar.Drivable.Particle.Position.Y + offset.Y), int32(cast.X), int32(cast.Y))
     }
-    testCar.Drivable.Tick()
+    testCar.Tick()
 
 
 
