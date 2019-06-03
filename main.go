@@ -97,16 +97,16 @@ func main() {
       switch t := event.(type) {
       case *sdl.KeyboardEvent:
         if (sdl.K_UP == t.Keysym.Sym) {
-          testCar.Drivable.Acceleration = 1
+          testCar.Accelerate(1)
         }
         if (sdl.K_DOWN == t.Keysym.Sym) {
-          testCar.Drivable.Acceleration = -1
+          testCar.Accelerate(-1)
         }
         if (sdl.K_LEFT == t.Keysym.Sym) {
-          testCar.Drivable.Direction = testCar.Drivable.Direction.Add(-5)
+          testCar.Rotate(-5)
         }
         if (sdl.K_RIGHT == t.Keysym.Sym) {
-          testCar.Drivable.Direction = testCar.Drivable.Direction.Add(5)
+          testCar.Rotate(5)
         }
         break
       case *sdl.QuitEvent:

@@ -64,6 +64,30 @@ func (c *Car) Draw (renderer *sdl.Renderer, offset geometry.Point) {
   renderer.DrawLine(int32(j.X),int32(j.Y),int32(m.X),int32(m.Y))
 }
 
+func (c *Car) Rotate (degrees float64) {
+  if (c.Alive && !c.Finished) {
+    if (degrees > 5) {
+      c.Drivable.Direction = c.Drivable.Direction.Add(5)
+    } else if (degrees < -5) {
+      c.Drivable.Direction = c.Drivable.Direction.Add(-5)
+    } else {
+      c.Drivable.Direction = c.Drivable.Direction.Add(degrees)
+    }
+  }
+}
+
+func (c *Car) Accelerate (acceleration float64) {
+  if (c.Alive && !c.Finished) {
+    if (acceleration > 1) {
+      c.Drivable.Acceleration = -1
+    } else if (acceleration < -1) {
+      c.Drivable.Acceleration = -1
+    } else {
+      c.Drivable.Acceleration = acceleration
+    }
+  }
+}
+
 func (c *Car) Tick () {
   if (c.Alive && !c.Finished) {
     c.Drivable.Tick()
