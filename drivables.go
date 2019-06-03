@@ -28,11 +28,12 @@ func (d Drivable) Draw (renderer *sdl.Renderer, offset geometry.Point) {
 
 func (d *Drivable) Tick () {
   frictionForce := geometry.Point{d.Particle.Velocity.X,d.Particle.Velocity.Y}
+  frictionForce = frictionForce.Multiply(0.075)
+  frictionForce = frictionForce.Multiply(frictionForce.Magnitude())
   frictionForce = frictionForce.Inverse()
-  frictionForce = frictionForce.Multiply(0.0175)
   d.Particle.ApplyForce(frictionForce)
   accelerationForce := geometry.Point{0,0}
-  accelerationForce = accelerationForce.Translate(d.Acceleration / 100, d.Direction)
+  accelerationForce = accelerationForce.Translate(d.Acceleration, d.Direction)
   d.Particle.ApplyForce(accelerationForce)
   d.Particle.Tick()
   //println(d.Particle.Position.X)

@@ -61,8 +61,6 @@ func main() {
     renderer.SetDrawColor(200,200,0,255)
     testLoop.Draw(renderer, offset)
     testCar.Draw(renderer, offset)
-    testCar.Drivable.Tick()
-
     testRay := geometry.Ray{
       geometry.Line{
         testCar.Drivable.Direction,
@@ -86,20 +84,23 @@ func main() {
     if(hit) {
       renderer.DrawLine(int32(testCar.Drivable.Particle.Position.X + offset.X), int32(testCar.Drivable.Particle.Position.Y + offset.Y), int32(cast.X), int32(cast.Y))
     }
+    testCar.Drivable.Tick()
+
+
 
 //    println(testCar.Drivable.Direction.Value)
     //testDrivable.Draw(renderer, geometry.Point{0,0})
     renderer.Present()
     //testParticle.Tick()
+    testCar.Drivable.Acceleration = 0
     for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
       switch t := event.(type) {
       case *sdl.KeyboardEvent:
-        testCar.Drivable.Acceleration = 0
         if (sdl.K_UP == t.Keysym.Sym) {
-          testCar.Drivable.Acceleration = 10
+          testCar.Drivable.Acceleration = 1
         }
         if (sdl.K_DOWN == t.Keysym.Sym) {
-          testCar.Drivable.Acceleration = -10
+          testCar.Drivable.Acceleration = -1
         }
         if (sdl.K_LEFT == t.Keysym.Sym) {
           testCar.Drivable.Direction = testCar.Drivable.Direction.Add(-5)
