@@ -11,7 +11,7 @@ type Car struct {
   Loop
   Alive bool
   Finished bool
-  stage int
+  Stage int
   R uint8
   G uint8
   B uint8
@@ -33,8 +33,8 @@ func (c *Car) CalculateBoundaries (offset geometry.Point) (geometry.Point, geome
   return topRightPoint, topLeftPoint, bottomLeftPoint, bottomRightPoint
 }
 
-func (c *Car) CollisionRayCast (point geometry.Point) bool {
-  raycastScene := raycasting.Scene{c.Loop.Walls}
+func (c *Car) CollisionRayCast (scene raycasting.Scene, point geometry.Point) bool {
+  raycastScene := scene
   ray := geometry.RayFromPoints(c.Drivable.Particle.Position, point)
   hit, result := raycastScene.ClosestRaycast(ray)
   if (hit) {
@@ -43,6 +43,15 @@ func (c *Car) CollisionRayCast (point geometry.Point) bool {
     return castDistance < checkDistance
   }
   return false
+}
+
+func (c *Car) CollisionDetect (scene raycasting.Scene) bool {
+  j, k, l, m := c.CalculateBoundaries(geometry.Point{0,0})
+  collided := c.CollisionRayCast(scene, j)
+  collided = collided || c.CollisionRayCast(scene, k)
+  collided = collided || c.CollisionRayCast(scene, l)
+  collided = collided || c.CollisionRayCast(scene, m)
+  return collided
 }
 
 func (c *Car) Draw (renderer *sdl.Renderer, offset geometry.Point) {
@@ -56,14 +65,28 @@ func (c *Car) Draw (renderer *sdl.Renderer, offset geometry.Point) {
 }
 
 func (c *Car) Tick () {
-  if (c.Alive) {
+  if (c.Alive && !c.Finished) {
     c.Drivable.Tick()
-    j, k, l, m := c.CalculateBoundaries(geometry.Point{0,0})
-    collided := c.CollisionRayCast(j)
-    collided = collided || c.CollisionRayCast(k)
-    collided = collided || c.CollisionRayCast(l)
-    collided = collided || c.CollisionRayCast(m)
-    if (collided) {
+    if (c.Stage < len(c.Loop.CheckPoints)) {
+      nextCheckPoint := []geometry.Segment{c.Loop.CheckPoints[c.Stage]}
+      collidedWithCheckPoint := c.CollisionDetect(raycasting.Scene{nextCheckPoint})
+      if (collidedWithCheckPoint) {
+        c.Stage += 1
+        println(c.Stage)
+      }
+    }
+    if (c.Stage == len(c.Loop.CheckPoints)) {
+      finishLine := []geometry.Segment{c.Loop.FinishLine}
+      collidedWithFinishLine := c.CollisionDetect(raycasting.Scene{finishLine})
+      if (collidedWithFinishLine) {
+        c.Finished = true
+        c.R = 255
+        c.G = 255
+        c.B = 255
+      }
+    }
+    collidedWithWalls := c.CollisionDetect(raycasting.Scene{c.Loop.Walls})
+    if (collidedWithWalls) {
       c.Alive = false
       c.R = 100
       c.G = 100
