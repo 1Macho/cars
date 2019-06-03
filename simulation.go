@@ -46,7 +46,7 @@ func (s *Simulation) Tick () {
   }
 
   if(allDead || s.Frames >= 1600 || oneWon) {
-    s.Loop = BuildRandomizedCircularTrack(10, 1400, 1750, 32)
+    s.Loop = BuildRandomizedCircularTrack(50, 1400, 1750, 24)
     bestCar := s.Cars[0]
     for i := 0; i < len(s.Cars); i++ {
       if (s.Cars[i].Finished) {

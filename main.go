@@ -39,9 +39,9 @@ func main() {
 
   rand.Seed(time.Now().UnixNano())
 
-  testLoop := BuildRandomizedCircularTrack(10, 1400, 1750, 32)
+  testLoop := BuildRandomizedCircularTrack(50, 1400, 1750, 24)
 
-  testSimulation := CreateSimulation(testLoop, 50)
+  testSimulation := CreateSimulation(testLoop, 30)
 
   running := true
   for running {
