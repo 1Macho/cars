@@ -3,10 +3,12 @@ package main
 import (
   "github.com/1Macho/geometry"
   "github.com/1Macho/raycasting"
+  "github.com/1Macho/neuralnetworking"
   "github.com/veandco/go-sdl2/sdl"
 )
 
 type Car struct {
+  neuralnetworking.Network
   Drivable
   Loop
   Alive bool
@@ -31,6 +33,40 @@ func (c *Car) CalculateBoundaries (offset geometry.Point) (geometry.Point, geome
   bottomRightPoint = bottomRightPoint.Add(offset).Add(c.Drivable.Particle.Position)
   bottomLeftPoint = bottomLeftPoint.Add(offset).Add(c.Drivable.Particle.Position)
   return topRightPoint, topLeftPoint, bottomLeftPoint, bottomRightPoint
+}
+
+func DrawLineRelative (a geometry.Point, b geometry.Point, offset geometry.Point, renderer *sdl.Renderer) {
+  trueA := a.Add(offset)
+  trueB := b.Add(offset)
+  renderer.DrawLine(int32(trueA.X),int32(trueA.Y),int32(trueB.X),int32(trueB.Y))
+}
+
+func (c *Car) DistancesMultiCast () []float64 {
+  multiCastResult := c.MultiCastFromCar()
+  result := make([]float64, len(multiCastResult))
+  for i := 0; i < len(multiCastResult); i++ {
+    result[i] = c.Drivable.Particle.Position.Distance(multiCastResult[i]) / 7000
+  }
+  return result
+}
+
+func (c *Car) MultiCastFromCar () []geometry.Point {
+  changePerTurn := 180.0 / 6.0
+  baseAngle := -90.0
+  result := make([]geometry.Point, 7)
+  for i := 0; i < 7; i++ {
+    result[i] = c.RayCastFromCar(baseAngle)
+    baseAngle += changePerTurn
+  }
+  return result
+}
+
+func (c *Car) RayCastFromCar (offset float64) geometry.Point {
+  newAngle := c.Drivable.Direction.Add(offset)
+  newRay := geometry.Ray{geometry.Line{newAngle, c.Drivable.Particle.Position}}
+  castScene := raycasting.Scene{c.Loop.Walls}
+  _, result := castScene.ClosestRaycast(newRay)
+  return result
 }
 
 func (c *Car) CollisionRayCast (scene raycasting.Scene, point geometry.Point) bool {
@@ -62,6 +98,11 @@ func (c *Car) Draw (renderer *sdl.Renderer, offset geometry.Point) {
   renderer.DrawLine(int32(k.X),int32(k.Y),int32(l.X),int32(l.Y))
   renderer.DrawLine(int32(l.X),int32(l.Y),int32(m.X),int32(m.Y))
   renderer.DrawLine(int32(j.X),int32(j.Y),int32(m.X),int32(m.Y))
+  multiCastResult := c.MultiCastFromCar()
+  renderer.SetDrawColor(0,20,20,255)
+  for i := 0; i < len(multiCastResult); i++ {
+    DrawLineRelative(c.Drivable.Particle.Position, multiCastResult[i], offset, renderer)
+  }
 }
 
 func (c *Car) Rotate (degrees float64) {
@@ -90,6 +131,12 @@ func (c *Car) Accelerate (acceleration float64) {
 
 func (c *Car) Tick () {
   if (c.Alive && !c.Finished) {
+    multiCastResult := c.DistancesMultiCast()
+    networkOutput := c.Network.CalculateOutput(multiCastResult)
+    println(networkOutput[0])
+    println(networkOutput[1])
+    c.Rotate(networkOutput[0] * 10)
+    c.Accelerate(networkOutput[1] * 2)
     c.Drivable.Tick()
     if (c.Stage < len(c.Loop.CheckPoints)) {
       nextCheckPoint := []geometry.Segment{c.Loop.CheckPoints[c.Stage]}
