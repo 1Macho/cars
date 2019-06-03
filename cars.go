@@ -91,17 +91,21 @@ func (c *Car) CollisionDetect (scene raycasting.Scene) bool {
 }
 
 func (c *Car) Draw (renderer *sdl.Renderer, offset geometry.Point) {
-  c.Drivable.Draw(renderer, offset)
-  renderer.SetDrawColor(c.R,c.G,c.B,255)
-  j, k, l, m := c.CalculateBoundaries(offset)
-  renderer.DrawLine(int32(j.X),int32(j.Y),int32(k.X),int32(k.Y))
-  renderer.DrawLine(int32(k.X),int32(k.Y),int32(l.X),int32(l.Y))
-  renderer.DrawLine(int32(l.X),int32(l.Y),int32(m.X),int32(m.Y))
-  renderer.DrawLine(int32(j.X),int32(j.Y),int32(m.X),int32(m.Y))
-  multiCastResult := c.MultiCastFromCar()
-  renderer.SetDrawColor(0,20,20,255)
-  for i := 0; i < len(multiCastResult); i++ {
-    DrawLineRelative(c.Drivable.Particle.Position, multiCastResult[i], offset, renderer)
+  if(c.Alive) {
+    c.Drivable.Draw(renderer, offset)
+    renderer.SetDrawColor(c.R,c.G,c.B,255)
+    j, k, l, m := c.CalculateBoundaries(offset)
+    renderer.DrawLine(int32(j.X),int32(j.Y),int32(k.X),int32(k.Y))
+    renderer.DrawLine(int32(k.X),int32(k.Y),int32(l.X),int32(l.Y))
+    renderer.DrawLine(int32(l.X),int32(l.Y),int32(m.X),int32(m.Y))
+    renderer.DrawLine(int32(j.X),int32(j.Y),int32(m.X),int32(m.Y))
+    /*
+    multiCastResult := c.MultiCastFromCar()
+    renderer.SetDrawColor(0,20,20,255)
+    for i := 0; i < len(multiCastResult); i++ {
+      DrawLineRelative(c.Drivable.Particle.Position, multiCastResult[i], offset, renderer)
+    }
+    */
   }
 }
 
@@ -119,10 +123,10 @@ func (c *Car) Rotate (degrees float64) {
 
 func (c *Car) Accelerate (acceleration float64) {
   if (c.Alive && !c.Finished) {
-    if (acceleration > 1) {
-      c.Drivable.Acceleration = -1
-    } else if (acceleration < -1) {
-      c.Drivable.Acceleration = -1
+    if (acceleration > 2) {
+      c.Drivable.Acceleration = 2
+    } else if (acceleration < -2) {
+      c.Drivable.Acceleration = -2
     } else {
       c.Drivable.Acceleration = acceleration
     }
@@ -133,9 +137,7 @@ func (c *Car) Tick () {
   if (c.Alive && !c.Finished) {
     multiCastResult := c.DistancesMultiCast()
     networkOutput := c.Network.CalculateOutput(multiCastResult)
-    println(networkOutput[0])
-    println(networkOutput[1])
-    c.Rotate(networkOutput[0] * 10)
+    c.Rotate(networkOutput[0] * 5)
     c.Accelerate(networkOutput[1] * 2)
     c.Drivable.Tick()
     if (c.Stage < len(c.Loop.CheckPoints)) {
@@ -143,7 +145,6 @@ func (c *Car) Tick () {
       collidedWithCheckPoint := c.CollisionDetect(raycasting.Scene{nextCheckPoint})
       if (collidedWithCheckPoint) {
         c.Stage += 1
-        println(c.Stage)
       }
     }
     if (c.Stage == len(c.Loop.CheckPoints)) {
@@ -151,17 +152,11 @@ func (c *Car) Tick () {
       collidedWithFinishLine := c.CollisionDetect(raycasting.Scene{finishLine})
       if (collidedWithFinishLine) {
         c.Finished = true
-        c.R = 255
-        c.G = 255
-        c.B = 255
       }
     }
     collidedWithWalls := c.CollisionDetect(raycasting.Scene{c.Loop.Walls})
     if (collidedWithWalls) {
       c.Alive = false
-      c.R = 100
-      c.G = 100
-      c.B = 100
     }
   }
 }

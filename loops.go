@@ -10,6 +10,7 @@ type Loop struct {
   Start geometry.Point
   FinishLine geometry.Segment
   CheckPoints []geometry.Segment
+  StartAngle geometry.Angle
 }
 
 func DrawSegment (renderer *sdl.Renderer, offset geometry.Point, toDraw geometry.Segment) {

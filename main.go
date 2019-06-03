@@ -27,6 +27,7 @@ func main() {
 
 	renderer.Clear()
 
+  fpsLock := true
   //testAngle := geometry.Angle{90}
   //println(testAngle.Slope())
   //testLine := geometry.Line{geometry.Angle{90+45},geometry.Point{0,1}}
@@ -38,9 +39,9 @@ func main() {
 
   rand.Seed(time.Now().UnixNano())
 
-  testLoop := BuildCircularTrack(1000, 1400, 16)
+  testLoop := BuildRandomizedCircularTrack(10, 1400, 1750, 32)
 
-  testSimulation := CreateSimulation(testLoop, 20)
+  testSimulation := CreateSimulation(testLoop, 50)
 
   running := true
   for running {
@@ -51,13 +52,23 @@ func main() {
     renderer.Present()
     //testParticle.Tick()
     for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-      switch event.(type) {
+      switch t := event.(type) {
+      case *sdl.KeyboardEvent:
+        if (sdl.K_UP == t.Keysym.Sym) {
+          fpsLock = true
+        }
+        if (sdl.K_DOWN == t.Keysym.Sym) {
+          fpsLock = false
+        }
+      break
       case *sdl.QuitEvent:
         println("Quit")
         running = false
         break
       }
     }
-    time.Sleep(1000000000/60)
+    if (fpsLock) {
+      time.Sleep(1000000000/60)
+    }
   }
 }
