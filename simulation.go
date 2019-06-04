@@ -94,19 +94,16 @@ func (s *Simulation) Tick () {
 }
 
 func (s *Simulation) Draw (renderer *sdl.Renderer) {
-  count := 0
-  xOffset := 0.0
-  yOffset := 0.0
+  bestCar := s.Cars[0]
+  bestFitness := bestCar.Fitness()
   for i := 0; i < len(s.Cars); i++ {
-    if (s.Cars[i].Alive) {
-      count++
-      xOffset += s.Cars[i].Drivable.Particle.Position.X
-      yOffset += s.Cars[i].Drivable.Particle.Position.Y
+    thisFitness := s.Cars[i].Fitness()
+    if (thisFitness > bestFitness) {
+      bestCar = s.Cars[i]
+      bestFitness = thisFitness
     }
   }
-  xOffset = xOffset / float64(count)
-  yOffset = yOffset / float64(count)
-  offset := geometry.Point{xOffset,yOffset}.Inverse().Add(geometry.Point{600, 500})
+  offset := bestCar.Drivable.Particle.Position.Inverse().Add(geometry.Point{600, 500})
   renderer.SetDrawColor(0,0,0,0)
   renderer.Clear()
   s.Loop.Draw(renderer, offset)
