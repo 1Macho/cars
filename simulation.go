@@ -7,7 +7,20 @@ import (
   "github.com/veandco/go-sdl2/sdl"
   "math/rand"
   "sync"
+  "sort"
 )
+
+type byFitness []Car
+
+func (s byFitness) Len() int {
+    return len(s)
+}
+func (s byFitness) Swap(i, j int) {
+    s[i], s[j] = s[j], s[i]
+}
+func (s byFitness) Less(i, j int) bool {
+    return s[i].Fitness() > s[j].Fitness()
+}
 
 type Simulation struct {
   Loop
@@ -39,6 +52,28 @@ func CreateSimulation (SampleSize int) Simulation {
   return Simulation{loop, cars, 0, 0}
 }
 
+func (s *Simulation) NextGeneration () {
+  s.Loop = ObtainTrack()
+  sort.Sort(byFitness(s.Cars))
+  newCars := make([]Car, len(s.Cars))
+  for i := 0; i < len(s.Cars); i++ {
+    thisCar := int(rand.Float64() * (float64(len(s.Cars))/10.0))
+    bestCar := s.Cars[thisCar]
+    baseNetwork := bestCar.Network
+    thisNetwork := baseNetwork.Mutate(0.1, 0.05, 0.08, 0.005, []int{7,5,2})
+    carParticle := physics.Particle{
+      s.Loop.Start,
+      geometry.Point{0,0},
+      geometry.Point{0,0},
+      1.0}
+    newCar := Car{thisNetwork, Drivable{carParticle, 0, s.Loop.StartAngle}, s.Loop, true, false, 0, bestCar.R, bestCar.G, bestCar.B}
+    newCars[i] = newCar
+  }
+  s.Generation += 1
+  s.Cars = newCars
+  s.Frames = 0
+}
+
 func (s *Simulation) Tick () {
   var waitgroup sync.WaitGroup
   for i := 0; i < len(s.Cars); i++ {
@@ -52,35 +87,10 @@ func (s *Simulation) Tick () {
     oneWon = oneWon || s.Cars[i].Finished
     allDead = allDead && !s.Cars[i].Alive
   }
-  if(allDead || s.Frames >= 1600 || oneWon) {
-    s.Loop = ObtainTrack()
-    bestCar := s.Cars[0]
-    for i := 0; i < len(s.Cars); i++ {
-      if (s.Cars[i].Finished) {
-        bestCar = s.Cars[i]
-        break
-      }
-      if (s.Cars[i].Fitness() > bestCar.Fitness()) {
-        bestCar = s.Cars[i]
-      }
-    }
-    newCars := make([]Car, len(s.Cars))
-    baseNetwork := bestCar.Network
-    for i := 0; i < len(s.Cars); i++ {
-      thisNetwork := baseNetwork.Mutate(0.1, 0.05, 0.08, 0.005, []int{7,5,2})
-      carParticle := physics.Particle{
-        s.Loop.Start,
-        geometry.Point{0,0},
-        geometry.Point{0,0},
-        1.0}
-      newCar := Car{thisNetwork, Drivable{carParticle, 0, s.Loop.StartAngle}, s.Loop, true, false, 0, bestCar.R, bestCar.G, bestCar.B}
-      newCars[i] = newCar
-    }
-    s.Generation += 1
-    s.Cars = newCars
-    s.Frames = 0
-  }
   s.Frames += 1
+  if(allDead || s.Frames >= 1600 || oneWon) {
+    s.NextGeneration()
+  }
 }
 
 func (s *Simulation) Draw (renderer *sdl.Renderer) {

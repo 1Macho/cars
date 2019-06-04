@@ -151,7 +151,11 @@ func (c *Car) DistanceToNextCheckPoint () float64 {
 }
 
 func (c *Car) Fitness () float64 {
-  return (1 / c.DistanceToNextCheckPoint()) * float64(c.Stage)
+  if (c.Finished){
+    return (1 / c.DistanceToNextCheckPoint()) * float64(c.Stage + 1)
+  } else {
+    return (1 / c.DistanceToNextCheckPoint()) * float64(c.Stage)
+  }
 }
 
 func (c *Car) Tick (waitgroup *sync.WaitGroup) {
