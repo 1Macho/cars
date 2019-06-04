@@ -134,16 +134,13 @@ func (c *Car) Accelerate (acceleration float64) {
   }
 }
 
-func (c *Car) DistanceToNextCheckPoint () float64 {
-  var nextCheckPoint geometry.Segment
-  if (c.Stage < len(c.Loop.CheckPoints)) {
-    nextCheckPoint = c.Loop.CheckPoints[c.Stage]
+func (c *Car) DistanceFromLastCheckPoint () float64 {
+  if (c.Stage == 0) {
+    return 0
   }
-  if (c.Stage == len(c.Loop.CheckPoints)) {
-    nextCheckPoint = c.Loop.FinishLine
-  }
-  checkPointA := nextCheckPoint.Line.Origin
-  checkPointB := nextCheckPoint.EndPoint()
+  lastCheckPoint := c.Loop.CheckPoints[c.Stage - 1]
+  checkPointA := lastCheckPoint.Line.Origin
+  checkPointB := lastCheckPoint.EndPoint()
   checkPointMiddle := geometry.Point{
     (checkPointA.X + checkPointB.X)/2,
     (checkPointA.Y + checkPointB.Y)/2}
@@ -151,11 +148,7 @@ func (c *Car) DistanceToNextCheckPoint () float64 {
 }
 
 func (c *Car) Fitness () float64 {
-  if (c.Finished){
-    return (1 / c.DistanceToNextCheckPoint()) * float64(c.Stage + 1)
-  } else {
-    return (1 / c.DistanceToNextCheckPoint()) * float64(c.Stage)
-  }
+  return float64(1000 * c.Stage) + c.DistanceFromLastCheckPoint()
 }
 
 func (c *Car) Tick (waitgroup *sync.WaitGroup) {

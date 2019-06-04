@@ -56,11 +56,23 @@ func (s *Simulation) NextGeneration () {
   s.Loop = ObtainTrack()
   sort.Sort(byFitness(s.Cars))
   newCars := make([]Car, len(s.Cars))
+  mutantsLeft := 5
   for i := 0; i < len(s.Cars); i++ {
-    thisCar := int(rand.Float64() * (float64(len(s.Cars))/10.0))
+    thisCar := int(rand.Float64() * (float64(len(s.Cars))/5.0))
     bestCar := s.Cars[thisCar]
     baseNetwork := bestCar.Network
     thisNetwork := baseNetwork.Mutate(0.1, 0.05, 0.08, 0.005, []int{7,5,2})
+    newR := bestCar.R
+    newG := bestCar.G
+    newB := bestCar.B
+    if (mutantsLeft > 0) {
+      for j = 0; j < 10; j++{
+        thisNetwork = thisNetwork.Mutate(0.1, 0.05, 0.08, 0.005, []int{7,5,2})
+      }
+      newR = 25 + uint8(rand.Float64() * 230)
+      newG = 25 + uint8(rand.Float64() * 230)
+      newB = 25 + uint8(rand.Float64() * 230)
+    }
     carParticle := physics.Particle{
       s.Loop.Start,
       geometry.Point{0,0},
@@ -94,16 +106,19 @@ func (s *Simulation) Tick () {
 }
 
 func (s *Simulation) Draw (renderer *sdl.Renderer) {
-  bestCar := s.Cars[0]
-  bestFitness := bestCar.Fitness()
+  count := 0
+  xOffset := 0.0
+  yOffset := 0.0
   for i := 0; i < len(s.Cars); i++ {
-    thisFitness := s.Cars[i].Fitness()
-    if (thisFitness > bestFitness) {
-      bestCar = s.Cars[i]
-      bestFitness = thisFitness
+    if (s.Cars[i].Alive) {
+      count++
+      xOffset += s.Cars[i].Drivable.Particle.Position.X
+      yOffset += s.Cars[i].Drivable.Particle.Position.Y
     }
   }
-  offset := bestCar.Drivable.Particle.Position.Inverse().Add(geometry.Point{600, 500})
+  xOffset = xOffset / float64(count)
+  yOffset = yOffset / float64(count)
+  offset := geometry.Point{xOffset,yOffset}.Inverse().Add(geometry.Point{600, 500})
   renderer.SetDrawColor(0,0,0,0)
   renderer.Clear()
   s.Loop.Draw(renderer, offset)
