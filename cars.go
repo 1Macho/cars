@@ -45,7 +45,7 @@ func (c *Car) DistancesMultiCast () []float64 {
   multiCastResult := c.MultiCastFromCar()
   result := make([]float64, len(multiCastResult))
   for i := 0; i < len(multiCastResult); i++ {
-    result[i] = c.Drivable.Particle.Position.Distance(multiCastResult[i]) / 7000
+    result[i] = c.Drivable.Particle.Position.Distance(multiCastResult[i]) / 1200
   }
   return result
 }

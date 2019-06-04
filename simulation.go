@@ -15,7 +15,12 @@ type Simulation struct {
   Generation int
 }
 
-func CreateSimulation (loop Loop, SampleSize int) Simulation {
+func ObtainTrack () Loop {
+  return BuildSimplexTrack(4000, 1200, 800, 100, 50)
+}
+
+func CreateSimulation (SampleSize int) Simulation {
+  loop := ObtainTrack()
   cars := make([]Car, SampleSize)
   for i := 0; i < SampleSize; i++ {
     carNetwork := neuralnetworking.BuildRandomNetwork([]int{7,5,2})
@@ -46,7 +51,7 @@ func (s *Simulation) Tick () {
   }
 
   if(allDead || s.Frames >= 1600 || oneWon) {
-    s.Loop = BuildRandomizedCircularTrack(50, 1400, 1750, 24)
+    s.Loop = ObtainTrack()
     bestCar := s.Cars[0]
     for i := 0; i < len(s.Cars); i++ {
       if (s.Cars[i].Finished) {
