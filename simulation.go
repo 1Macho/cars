@@ -16,7 +16,7 @@ type Simulation struct {
 }
 
 func ObtainTrack () Loop {
-  return BuildSimplexTrack(4000, 1200, 800, 100, 50)
+  return BuildSimplexTrack(4000, 900, 1200, 100, 25)
 }
 
 func CreateSimulation (SampleSize int) Simulation {
@@ -29,9 +29,9 @@ func CreateSimulation (SampleSize int) Simulation {
       geometry.Point{0,0},
       geometry.Point{0,0},
       1.0}
-    r := 150 + uint8(rand.Float64() * 105)
-    g := 150 + uint8(rand.Float64() * 105)
-    b := 150 + uint8(rand.Float64() * 105)
+    r := 25 + uint8(rand.Float64() * 230)
+    g := 25 + uint8(rand.Float64() * 230)
+    b := 25 + uint8(rand.Float64() * 230)
     newCar := Car{carNetwork, Drivable{carParticle, 0, loop.StartAngle}, loop, true, false, 0, r, g, b}
     cars[i] = newCar
   }
@@ -58,7 +58,7 @@ func (s *Simulation) Tick () {
         bestCar = s.Cars[i]
         break
       }
-      if (s.Cars[i].Stage > bestCar.Stage) {
+      if (s.Cars[i].Fitness() > bestCar.Fitness()) {
         bestCar = s.Cars[i]
       }
     }

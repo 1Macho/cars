@@ -14,6 +14,10 @@ func BuildSimplexTrack (radius float64, width float64, amplification float64, zo
   checkPointsPoints := []geometry.Point{}
   currentAngle := geometry.Angle{0}
   noiseGen := opensimplex.New(time.Now().UnixNano())
+  shouldInvert := false
+  if (rand.Float64() > 0.5) {
+    shouldInvert = true
+  }
   var finishLine geometry.Segment
   var startPosition geometry.Point
   for i := 0; i < segments; i++ {
@@ -21,11 +25,18 @@ func BuildSimplexTrack (radius float64, width float64, amplification float64, zo
     noiseValue :=radius + noiseGen.Eval2(basePoint.X / zoom, basePoint.Y / zoom) * amplification
     innerPoint := geometry.Point{0,0}.Translate(noiseValue, currentAngle)
     outerPoint := geometry.Point{0,0}.Translate(noiseValue + width, currentAngle)
+    if (shouldInvert) {
+      outerPoint.X = outerPoint.X * -1
+      innerPoint.X = innerPoint.X * -1
+    }
     innerPoints = append(innerPoints, innerPoint)
     outerPoints = append(outerPoints, outerPoint)
     if (i == 0) {
       midPoint := noiseValue + width / 2
       startPosition = geometry.Point{0,0}.Translate(midPoint, currentAngle)
+      if (shouldInvert) {
+        startPosition.X = startPosition.X * -1
+      }
       finishLine = geometry.SegmentFromPoints(innerPoint, outerPoint)
     } else {
       checkPointsPoints = append(checkPointsPoints, innerPoint, outerPoint)

@@ -133,6 +133,26 @@ func (c *Car) Accelerate (acceleration float64) {
   }
 }
 
+func (c *Car) DistanceToNextCheckPoint () float64 {
+  var nextCheckPoint geometry.Segment
+  if (c.Stage < len(c.Loop.CheckPoints)) {
+    nextCheckPoint = c.Loop.CheckPoints[c.Stage]
+  }
+  if (c.Stage == len(c.Loop.CheckPoints)) {
+    nextCheckPoint = c.Loop.FinishLine
+  }
+  checkPointA := nextCheckPoint.Line.Origin
+  checkPointB := nextCheckPoint.EndPoint()
+  checkPointMiddle := geometry.Point{
+    (checkPointA.X + checkPointB.X)/2,
+    (checkPointA.Y + checkPointB.Y)/2}
+  return c.Drivable.Particle.Position.Distance(checkPointMiddle)
+}
+
+func (c *Car) Fitness () float64 {
+  return (1 / c.DistanceToNextCheckPoint()) * float64(c.Stage)
+}
+
 func (c *Car) Tick () {
   if (c.Alive && !c.Finished) {
     multiCastResult := c.DistancesMultiCast()
