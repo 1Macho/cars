@@ -5,6 +5,7 @@ import (
   "github.com/1Macho/raycasting"
   "github.com/1Macho/neuralnetworking"
   "github.com/veandco/go-sdl2/sdl"
+  "sync"
 )
 
 type Car struct {
@@ -153,7 +154,7 @@ func (c *Car) Fitness () float64 {
   return (1 / c.DistanceToNextCheckPoint()) * float64(c.Stage)
 }
 
-func (c *Car) Tick () {
+func (c *Car) Tick (waitgroup *sync.WaitGroup) {
   if (c.Alive && !c.Finished) {
     multiCastResult := c.DistancesMultiCast()
     networkOutput := c.Network.CalculateOutput(multiCastResult)
@@ -179,4 +180,5 @@ func (c *Car) Tick () {
       c.Alive = false
     }
   }
+  waitgroup.Done()
 }

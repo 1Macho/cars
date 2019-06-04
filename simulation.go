@@ -6,6 +6,7 @@ import (
   "github.com/1Macho/physics"
   "github.com/veandco/go-sdl2/sdl"
   "math/rand"
+  "sync"
 )
 
 type Simulation struct {
@@ -39,17 +40,18 @@ func CreateSimulation (SampleSize int) Simulation {
 }
 
 func (s *Simulation) Tick () {
+  var waitgroup sync.WaitGroup
   for i := 0; i < len(s.Cars); i++ {
-    s.Cars[i].Tick()
+    waitgroup.Add(1)
+    go s.Cars[i].Tick(&waitgroup)
   }
+  waitgroup.Wait()
   allDead := true
   oneWon := false
   for i := 0; i < len(s.Cars); i++ {
-    s.Cars[i].Tick()
     oneWon = oneWon || s.Cars[i].Finished
     allDead = allDead && !s.Cars[i].Alive
   }
-
   if(allDead || s.Frames >= 1600 || oneWon) {
     s.Loop = ObtainTrack()
     bestCar := s.Cars[0]
