@@ -66,19 +66,20 @@ func (s *Simulation) NextGeneration () {
     newG := bestCar.G
     newB := bestCar.B
     if (mutantsLeft > 0) {
-      for j = 0; j < 10; j++{
+      for j := 0; j < 100; j++{
         thisNetwork = thisNetwork.Mutate(0.1, 0.05, 0.08, 0.005, []int{7,5,2})
       }
       newR = 25 + uint8(rand.Float64() * 230)
       newG = 25 + uint8(rand.Float64() * 230)
       newB = 25 + uint8(rand.Float64() * 230)
+      mutantsLeft--
     }
     carParticle := physics.Particle{
       s.Loop.Start,
       geometry.Point{0,0},
       geometry.Point{0,0},
       1.0}
-    newCar := Car{thisNetwork, Drivable{carParticle, 0, s.Loop.StartAngle}, s.Loop, true, false, 0, bestCar.R, bestCar.G, bestCar.B}
+    newCar := Car{thisNetwork, Drivable{carParticle, 0, s.Loop.StartAngle}, s.Loop, true, false, 0, newR, newG, newB}
     newCars[i] = newCar
   }
   s.Generation += 1
