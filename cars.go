@@ -55,9 +55,15 @@ func (c *Car) MultiCastFromCar () []geometry.Point {
   changePerTurn := 180.0 / 6.0
   baseAngle := -90.0
   result := make([]geometry.Point, 7)
+  resultsChannel := make(chan geometry.Point)
   for i := 0; i < 7; i++ {
-    result[i] = c.RayCastFromCar(baseAngle)
+    go func () {
+      resultsChannel <- c.RayCastFromCar(baseAngle)
+    }()
     baseAngle += changePerTurn
+  }
+  for i := 0; i < 7; i++ {
+    result[i] = <- resultsChannel
   }
   return result
 }
