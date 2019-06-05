@@ -69,9 +69,9 @@ func (s *Simulation) NextGeneration () {
       for j := 0; j < 100; j++{
         thisNetwork = thisNetwork.Mutate(0.1, 0.05, 0.08, 0.005, []int{7,5,2})
       }
-      newR = 25 + uint8(rand.Float64() * 230)
-      newG = 25 + uint8(rand.Float64() * 230)
-      newB = 25 + uint8(rand.Float64() * 230)
+      newR = newR + uint8(rand.Float64() * 50) - 25
+      newG = newG + uint8(rand.Float64() * 50) - 25
+      newB = newB + uint8(rand.Float64() * 50) - 25
       mutantsLeft--
     }
     carParticle := physics.Particle{
@@ -101,7 +101,7 @@ func (s *Simulation) Tick () {
     allDead = allDead && !s.Cars[i].Alive
   }
   s.Frames += 1
-  if(allDead || s.Frames >= 1600 || oneWon) {
+  if(allDead || s.Frames >= 3200 || oneWon) {
     s.NextGeneration()
   }
 }
