@@ -66,7 +66,7 @@ func (s *Simulation) NextGeneration () {
 
     fitnessAcum += s.Cars[i].Fitness()
 
-    thisCar := int(rand.Float64() * (float64(len(s.Cars))/30.0))
+    thisCar := int(rand.Float64() * (float64(len(s.Cars))/9.0))
     bestCar := s.Cars[thisCar]
     baseNetwork := bestCar.Network
     thisNetwork := baseNetwork.Mutate(0.1, 0.05, 0.08, 0.005, []int{7,5,2})
@@ -145,7 +145,7 @@ func (s *Simulation) Draw (renderer *sdl.Renderer) {
     s.Cars[i].Draw(renderer, offset)
   }
 
-  graphDivider := 50.0
+  graphDivider := 250.0
   graphMultiplier := 10
   baseHeight := 990
 
