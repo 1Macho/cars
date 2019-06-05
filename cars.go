@@ -51,19 +51,25 @@ func (c *Car) DistancesMultiCast () []float64 {
   return result
 }
 
+type MultiCast struct {
+  geometry.Point
+  Id int
+}
+
 func (c *Car) MultiCastFromCar () []geometry.Point {
   changePerTurn := 180.0 / 6.0
   baseAngle := -90.0
   result := make([]geometry.Point, 7)
-  resultsChannel := make(chan geometry.Point)
+  resultsChannel := make(chan MultiCast)
   for i := 0; i < 7; i++ {
-    go func () {
-      resultsChannel <- c.RayCastFromCar(baseAngle)
-    }()
+    go func (Id int, Angle float64) {
+      resultsChannel <- MultiCast{c.RayCastFromCar(Angle), Id}
+    }(i, baseAngle)
     baseAngle += changePerTurn
   }
   for i := 0; i < 7; i++ {
-    result[i] = <- resultsChannel
+    thisCast := <- resultsChannel
+    result[thisCast.Id] = thisCast.Point
   }
   return result
 }
@@ -142,6 +148,10 @@ func (c *Car) Accelerate (acceleration float64) {
 
 func (c *Car) DistanceFromLastCheckPoint () float64 {
   if (c.Stage == 0) {
+    startDistance := c.Drivable.Particle.Position.Distance(c.Loop.Start)
+    if (c.Drivable.Particle.Position.Y > c.Loop.Start.Y) {
+      return startDistance
+    }
     return 0
   }
   lastCheckPoint := c.Loop.CheckPoints[c.Stage - 1]

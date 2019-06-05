@@ -39,7 +39,7 @@ func main() {
 
   rand.Seed(time.Now().UnixNano())
 
-  testSimulation := CreateSimulation(200)
+  testSimulation := CreateSimulation(300)
 
   running := true
   for running {

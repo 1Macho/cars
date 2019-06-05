@@ -27,6 +27,10 @@ type Simulation struct {
   Cars []Car
   Frames int
   Generation int
+  MaxFitness []float64
+  AvgFitness []float64
+  MedianFitness []float64
+  MinFitness []float64
 }
 
 func ObtainTrack () Loop {
@@ -49,7 +53,7 @@ func CreateSimulation (SampleSize int) Simulation {
     newCar := Car{carNetwork, Drivable{carParticle, 0, loop.StartAngle}, loop, true, false, 0, r, g, b}
     cars[i] = newCar
   }
-  return Simulation{loop, cars, 0, 0}
+  return Simulation{loop, cars, 0, 0, []float64{},[]float64{},[]float64{},[]float64{}}
 }
 
 func (s *Simulation) NextGeneration () {
@@ -57,8 +61,12 @@ func (s *Simulation) NextGeneration () {
   sort.Sort(byFitness(s.Cars))
   newCars := make([]Car, len(s.Cars))
   mutantsLeft := 5
+  fitnessAcum := 0.0
   for i := 0; i < len(s.Cars); i++ {
-    thisCar := int(rand.Float64() * (float64(len(s.Cars))/5.0))
+
+    fitnessAcum += s.Cars[i].Fitness()
+
+    thisCar := int(rand.Float64() * (float64(len(s.Cars))/30.0))
     bestCar := s.Cars[thisCar]
     baseNetwork := bestCar.Network
     thisNetwork := baseNetwork.Mutate(0.1, 0.05, 0.08, 0.005, []int{7,5,2})
@@ -82,6 +90,16 @@ func (s *Simulation) NextGeneration () {
     newCar := Car{thisNetwork, Drivable{carParticle, 0, s.Loop.StartAngle}, s.Loop, true, false, 0, newR, newG, newB}
     newCars[i] = newCar
   }
+
+  maxFitness := s.Cars[0].Fitness()
+  avgFitness := fitnessAcum / float64(len(s.Cars))
+  medianFitness := s.Cars[len(s.Cars) / 2].Fitness()
+  minFitness := s.Cars[len(s.Cars) - 1].Fitness()
+  s.MaxFitness = append(s.MaxFitness, maxFitness)
+  s.AvgFitness = append(s.AvgFitness, avgFitness)
+  s.MedianFitness = append(s.MedianFitness, medianFitness)
+  s.MinFitness = append(s.MinFitness, minFitness)
+
   s.Generation += 1
   s.Cars = newCars
   s.Frames = 0
@@ -126,4 +144,35 @@ func (s *Simulation) Draw (renderer *sdl.Renderer) {
   for i := 0; i < len(s.Cars); i++ {
     s.Cars[i].Draw(renderer, offset)
   }
+
+  graphDivider := 50.0
+  graphMultiplier := 10
+  baseHeight := 990
+
+  if(len(s.MaxFitness) >= 2) {
+    for index := 0; index <= 100; index++{
+      i := len(s.MaxFitness) - 2 - index
+      if(i > 0) {
+        maxFitness := baseHeight - int(s.MaxFitness[i] / graphDivider)
+        avgFitness := baseHeight - int(s.AvgFitness[i] / graphDivider)
+        medianFitness := baseHeight - int(s.MedianFitness[i] / graphDivider)
+        minFitness := baseHeight - int(s.MinFitness[i] / graphDivider)
+        maxFitnessN := baseHeight - int(s.MaxFitness[i+1] / graphDivider)
+        avgFitnessN := baseHeight - int(s.AvgFitness[i+1] / graphDivider)
+        medianFitnessN := baseHeight - int(s.MedianFitness[i+1] / graphDivider)
+        minFitnessN := baseHeight - int(s.MinFitness[i+1] / graphDivider)
+        thisX := ((100 - index) * graphMultiplier + 10)
+        nextX := (((100 - index) + 1) * graphMultiplier + 10)
+        renderer.SetDrawColor(0,255,0,255)
+        renderer.DrawLine(int32(thisX),int32(maxFitness),int32(nextX),int32(maxFitnessN))
+        renderer.SetDrawColor(0,0,255,255)
+        renderer.DrawLine(int32(thisX),int32(avgFitness),int32(nextX),int32(avgFitnessN))
+        renderer.SetDrawColor(0,255,255,255)
+        renderer.DrawLine(int32(thisX),int32(medianFitness),int32(nextX),int32(medianFitnessN))
+        renderer.SetDrawColor(255,0,0,255)
+        renderer.DrawLine(int32(thisX),int32(minFitness),int32(nextX),int32(minFitnessN))
+      } else { break; }
+    }
+  }
+
 }
